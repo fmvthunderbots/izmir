@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>İzmir Seyahat Maliyet Kıyaslayıcı: Araba vs Uçak</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-100 min-h-screen flex items-center justify-center p-4">
+
+    <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full p-6 sm:p-8">
+        <h1 class="text-3xl font-bold text-slate-800 mb-8 text-center">İzmir Git-Gel Seyahat Kıyaslayıcı</h1>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            
+            <div class="bg-blue-50/50 p-6 rounded-xl border border-blue-100 flex flex-col">
+                <div class="flex items-center gap-3 mb-6 border-b border-blue-200 pb-3">
+                    <span class="text-2xl">🚗</span>
+                    <h2 class="text-xl font-bold text-blue-900">Araba + Otel</h2>
+                </div>
+
+                <div class="space-y-5 flex-grow">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1 uppercase">Yakıt (L/100km)</label>
+                            <input type="number" id="tuketim" value="7" step="0.1" class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none font-medium" oninput="hesapla()">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1 uppercase">Yakıt Fiyatı (TL)</label>
+                            <input type="number" id="fiyat" value="42" step="0.1" class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none font-medium" oninput="hesapla()">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4 pt-2 border-t border-blue-100">
+                        <div>
+                            <h3 class="text-xs font-bold text-slate-700 mb-2 uppercase">Gidiş Tercihi</h3>
+                            <label class="flex items-center mb-2 cursor-pointer">
+                                <input type="checkbox" id="osmangazi_gidis" class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500" onchange="hesapla()">
+                                <span class="ml-2 text-xs text-slate-700 font-medium">Osmangazi (995 ₺)</span>
+                            </label>
+                            <label class="flex items-center cursor-pointer">
+                                <input type="checkbox" id="otoyol_gidis" class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500" onchange="hesapla()">
+                                <span class="ml-2 text-xs text-slate-700 font-medium">İzmir Otoyolu (1.470 ₺)</span>
+                            </label>
+                        </div>
+                        <div>
+                            <h3 class="text-xs font-bold text-slate-700 mb-2 uppercase">Dönüş Tercihi</h3>
+                            <label class="flex items-center mb-2 cursor-pointer">
+                                <input type="checkbox" id="osmangazi_donus" class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500" onchange="hesapla()">
+                                <span class="ml-2 text-xs text-slate-700 font-medium">Osmangazi (995 ₺)</span>
+                            </label>
+                            <label class="flex items-center cursor-pointer">
+                                <input type="checkbox" id="otoyol_donus" class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500" onchange="hesapla()">
+                                <span class="ml-2 text-xs text-slate-700 font-medium">İzmir Otoyolu (1.470 ₺)</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="bg-blue-100/60 p-3 rounded-lg border border-blue-200">
+                        <span class="block text-xs font-semibold text-slate-600 mb-1 uppercase">Hesaplanan Git-Gel Yolculuk</span>
+                        <div class="flex items-center gap-2">
+                            <span id="toplamMesafeGosterge" class="text-2xl font-black text-blue-900">0 km</span>
+                        </div>
+                        <p class="text-[10px] text-slate-500 mt-1 leading-tight">* Seçtiğiniz güzergahlara göre (ücretli yolların kısalığı hesaba katılarak) otomatik belirlenir.</p>
+                    </div>
+
+                    <div class="pt-3 pb-1 border-t border-blue-200">
+                        <div class="flex justify-between items-center text-sm bg-white/50 p-2 rounded-lg border border-blue-100">
+                            <span class="font-semibold text-slate-600 uppercase text-xs">Otel Ücreti:</span>
+                            <span class="font-bold text-slate-800">4.310 ₺ <span class="text-xs font-medium text-green-600 ml-1">(Ödendi)</span></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4 bg-blue-200/50 p-4 rounded-xl text-right border border-blue-200 shadow-sm">
+                    <span class="text-sm font-semibold text-blue-800 block mb-1">Araba + Otel Toplamı:</span>
+                    <span id="arabaToplamTutar" class="text-3xl font-black text-blue-900 tracking-tight">0 ₺</span>
+                </div>
+            </div>
+
+            <div class="bg-orange-50/50 p-6 rounded-xl border border-orange-100 flex flex-col">
+                <div class="flex items-center gap-3 mb-6 border-b border-orange-200 pb-3">
+                    <span class="text-2xl">✈️</span>
+                    <h2 class="text-xl font-bold text-orange-900">Uçak Bileti</h2>
+                </div>
+
+                <div class="space-y-4 flex-grow">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1 uppercase">Tek Yön Bilet Fiyatı (1 Kişi - TL)</label>
+                        <input type="number" id="biletFiyati" value="1500" step="50" class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 outline-none font-medium" oninput="hesapla()">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1 uppercase">Kişi Sayısı</label>
+                        <input type="number" id="kisiSayisi" value="1" min="1" class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 outline-none font-medium" oninput="hesapla()">
+                    </div>
+
+                    <p class="text-xs text-slate-500 mt-2 italic">* Sistem girdiğin fiyatı gidiş-dönüş (x2) ve kişi sayısına göre otomatik hesaplar.</p>
+                </div>
+
+                <div class="mt-auto pt-6">
+                    <div class="bg-orange-200/50 p-4 rounded-xl text-right border border-orange-200 shadow-sm">
+                        <span class="text-sm font-semibold text-orange-800 block mb-1">Uçak Toplamı (Git-Gel):</span>
+                        <span id="ucakToplamTutar" class="text-3xl font-black text-orange-900 tracking-tight">0 ₺</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div id="sonucKutusu" class="mt-8 p-6 rounded-xl text-center border-2 transition-colors duration-300 shadow-sm">
+            <h3 class="text-sm font-bold text-slate-500 mb-3 uppercase tracking-wider">Sonuç ve Kıyaslama</h3>
+            <div id="sonucMetni" class="text-3xl font-black">Değerleri girin...</div>
+            <div id="farkMetni" class="text-lg font-medium mt-2 text-slate-700"></div>
+        </div>
+
+    </div>
+
+    <script>
+        function hesapla() {
+            // --- ARABA + OTEL HESAPLAMALARI ---
+            const tuketim = parseFloat(document.getElementById('tuketim').value) || 0;
+            const fiyat = parseFloat(document.getElementById('fiyat').value) || 0;
+            
+            // Sabit Otel Ücreti
+            const otel = 4310; 
+            
+            // Gidiş Tercihleri
+            const osmangaziGidis = document.getElementById('osmangazi_gidis').checked;
+            const otoyolGidis = document.getElementById('otoyol_gidis').checked;
+            
+            // Dönüş Tercihleri
+            const osmangaziDonus = document.getElementById('osmangazi_donus').checked;
+            const otoyolDonus = document.getElementById('otoyol_donus').checked;
+
+            const ucretOsmangazi = 995;
+            const ucretOtoyol = 1470;
+
+            // MESAFE HESAPLAMA MANTIĞI
+            // Eski yol (Körfez dolaşılarak) baz alındı: 530 km
+            let gidisMesafe = 530;
+            if (osmangaziGidis) gidisMesafe -= 80; // Köprü yolu 80 km kısaltır
+            if (otoyolGidis) gidisMesafe -= 50;    // Otoyol ekstra 50 km kısaltır
+
+            let donusMesafe = 530;
+            if (osmangaziDonus) donusMesafe -= 80;
+            if (otoyolDonus) donusMesafe -= 50;
+
+            const toplamMesafe = gidisMesafe + donusMesafe;
+            
+            // Toplam Mesafeyi Ekrana Yazdır
+            document.getElementById('toplamMesafeGosterge').innerText = toplamMesafe + ' km';
+
+            // Yakıt Masrafı: Toplam mesafe üzerinden
+            const yakitMasrafi = (toplamMesafe / 100) * tuketim * fiyat;
+            
+            // Gişe Masrafları
+            let giseMasrafi = 0;
+            if (osmangaziGidis) giseMasrafi += ucretOsmangazi;
+            if (otoyolGidis) giseMasrafi += ucretOtoyol;
+            if (osmangaziDonus) giseMasrafi += ucretOsmangazi;
+            if (otoyolDonus) giseMasrafi += ucretOtoyol;
+
+            const arabaGenelToplam = yakitMasrafi + giseMasrafi + otel;
+
+            // --- UÇAK HESAPLAMALARI ---
+            const biletFiyati = parseFloat(document.getElementById('biletFiyati').value) || 0;
+            const kisiSayisi = parseFloat(document.getElementById('kisiSayisi').value) || 0;
+
+            // Bilet fiyatı (tek yön) x 2 (git-gel) x kişi sayısı
+            const ucakGenelToplam = biletFiyati * 2 * kisiSayisi;
+
+            // --- EKRANA YAZDIRMA ---
+            document.getElementById('arabaToplamTutar').innerText = arabaGenelToplam.toLocaleString('tr-TR', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) + ' ₺';
+            document.getElementById('ucakToplamTutar').innerText = ucakGenelToplam.toLocaleString('tr-TR', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) + ' ₺';
+
+            // --- KIYASLAMA MANTIĞI ---
+            const sonucKutusu = document.getElementById('sonucKutusu');
+            const sonucMetni = document.getElementById('sonucMetni');
+            const farkMetni = document.getElementById('farkMetni');
+            
+            const fark = Math.abs(arabaGenelToplam - ucakGenelToplam);
+            const formatliFark = fark.toLocaleString('tr-TR', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) + ' ₺';
+
+            if (arabaGenelToplam < ucakGenelToplam) {
+                sonucKutusu.className = "mt-8 p-6 rounded-xl text-center border-2 border-blue-400 bg-blue-50 transition-colors duration-300 shadow-sm";
+                sonucMetni.className = "text-3xl font-black text-blue-700";
+                sonucMetni.innerText = "🚗 Araba ile gitmek daha kârlı!";
+                farkMetni.innerText = `Uçağa kıyasla cebinizde ${formatliFark} kalır.`;
+            } else if (ucakGenelToplam < arabaGenelToplam) {
+                sonucKutusu.className = "mt-8 p-6 rounded-xl text-center border-2 border-orange-400 bg-orange-50 transition-colors duration-300 shadow-sm";
+                sonucMetni.className = "text-3xl font-black text-orange-700";
+                sonucMetni.innerText = "✈️ Uçakla gitmek daha kârlı!";
+                farkMetni.innerText = `Arabaya kıyasla cebinizde ${formatliFark} kalır.`;
+            } else {
+                sonucKutusu.className = "mt-8 p-6 rounded-xl text-center border-2 border-slate-300 bg-slate-100 transition-colors duration-300 shadow-sm";
+                sonucMetni.className = "text-3xl font-black text-slate-700";
+                sonucMetni.innerText = "⚖️ İki seçenek de aynı fiyata geliyor!";
+                farkMetni.innerText = "Karar tamamen konfor tercihinize kalmış.";
+            }
+        }
+
+        // Sayfa yüklendiğinde hesaplamayı çalıştır
+        window.onload = hesapla;
+    </script>
+</body>
+</html>
