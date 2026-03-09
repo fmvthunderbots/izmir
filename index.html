@@ -27,11 +27,11 @@
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs font-semibold text-slate-600 mb-1 uppercase">Yakıt (L/100km)</label>
-                            <input type="number" id="tuketim" value="7" step="0.1" class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none font-medium" oninput="hesapla()">
+                            <input type="text" inputmode="decimal" id="tuketim" value="7" class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none font-medium" oninput="hesapla()">
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-slate-600 mb-1 uppercase">Yakıt Fiyatı (TL)</label>
-                            <input type="number" id="fiyat" value="42" step="0.1" class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none font-medium" oninput="hesapla()">
+                            <input type="text" inputmode="decimal" id="fiyat" value="42" class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none font-medium" oninput="hesapla()">
                         </div>
                     </div>
 
@@ -65,10 +65,15 @@
                         <div class="flex items-center gap-2">
                             <span id="toplamMesafeGosterge" class="text-2xl font-black text-blue-900">0 km</span>
                         </div>
-                        <p class="text-[10px] text-slate-500 mt-1 leading-tight">* Seçtiğiniz güzergahlara göre (ücretli yolların kısalığı hesaba katılarak) otomatik belirlenir.</p>
+                        <p class="text-[10px] text-slate-500 mt-1 leading-tight">* Seçtiğiniz güzergahlara göre otomatik belirlenir.</p>
                     </div>
 
-                    <div class="pt-3 pb-1 border-t border-blue-200">
+                    <div class="pt-3 border-t border-blue-200">
+                        <div class="flex justify-between items-center text-sm bg-white/50 p-2 rounded-lg border border-blue-100 mb-2">
+                            <span class="font-semibold text-slate-600 uppercase text-xs">Git-Gel Yakıt Masrafı:</span>
+                            <span id="toplamYakitGosterge" class="font-bold text-slate-800">0 ₺</span>
+                        </div>
+                        
                         <div class="flex justify-between items-center text-sm bg-white/50 p-2 rounded-lg border border-blue-100">
                             <span class="font-semibold text-slate-600 uppercase text-xs">Otel Ücreti:</span>
                             <span class="font-bold text-slate-800">4.310 ₺ <span class="text-xs font-medium text-green-600 ml-1">(Ödendi)</span></span>
@@ -91,7 +96,7 @@
                 <div class="space-y-4 flex-grow">
                     <div>
                         <label class="block text-xs font-semibold text-slate-600 mb-1 uppercase">Tek Yön Bilet Fiyatı (1 Kişi - TL)</label>
-                        <input type="number" id="biletFiyati" value="1500" step="50" class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 outline-none font-medium" oninput="hesapla()">
+                        <input type="text" inputmode="decimal" id="biletFiyati" value="1500" class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 outline-none font-medium" oninput="hesapla()">
                     </div>
 
                     <div>
@@ -121,10 +126,18 @@
     </div>
 
     <script>
+        // Virgüllü girişleri noktaya çeviren yardımcı fonksiyon
+        function formatNumberInput(value) {
+            if (!value) return 0;
+            // İçindeki virgülleri noktaya çevir
+            let cleanValue = value.replace(/,/g, '.');
+            return parseFloat(cleanValue) || 0;
+        }
+
         function hesapla() {
             // --- ARABA + OTEL HESAPLAMALARI ---
-            const tuketim = parseFloat(document.getElementById('tuketim').value) || 0;
-            const fiyat = parseFloat(document.getElementById('fiyat').value) || 0;
+            const tuketim = formatNumberInput(document.getElementById('tuketim').value);
+            const fiyat = formatNumberInput(document.getElementById('fiyat').value);
             
             // Sabit Otel Ücreti
             const otel = 4310; 
@@ -141,22 +154,22 @@
             const ucretOtoyol = 1470;
 
             // MESAFE HESAPLAMA MANTIĞI
-            // Eski yol (Körfez dolaşılarak) baz alındı: 530 km
             let gidisMesafe = 530;
-            if (osmangaziGidis) gidisMesafe -= 80; // Köprü yolu 80 km kısaltır
-            if (otoyolGidis) gidisMesafe -= 50;    // Otoyol ekstra 50 km kısaltır
+            if (osmangaziGidis) gidisMesafe -= 80; 
+            if (otoyolGidis) gidisMesafe -= 50;    
 
             let donusMesafe = 530;
             if (osmangaziDonus) donusMesafe -= 80;
             if (otoyolDonus) donusMesafe -= 50;
 
             const toplamMesafe = gidisMesafe + donusMesafe;
-            
-            // Toplam Mesafeyi Ekrana Yazdır
             document.getElementById('toplamMesafeGosterge').innerText = toplamMesafe + ' km';
 
-            // Yakıt Masrafı: Toplam mesafe üzerinden
+            // Yakıt Masrafı
             const yakitMasrafi = (toplamMesafe / 100) * tuketim * fiyat;
+            
+            // Yakıt masrafını ekrana yazdır (Otel ücretinin üstündeki alan)
+            document.getElementById('toplamYakitGosterge').innerText = yakitMasrafi.toLocaleString('tr-TR', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) + ' ₺';
             
             // Gişe Masrafları
             let giseMasrafi = 0;
@@ -165,13 +178,14 @@
             if (osmangaziDonus) giseMasrafi += ucretOsmangazi;
             if (otoyolDonus) giseMasrafi += ucretOtoyol;
 
+            // Araba Genel Toplam
             const arabaGenelToplam = yakitMasrafi + giseMasrafi + otel;
 
             // --- UÇAK HESAPLAMALARI ---
-            const biletFiyati = parseFloat(document.getElementById('biletFiyati').value) || 0;
+            const biletFiyati = formatNumberInput(document.getElementById('biletFiyati').value);
             const kisiSayisi = parseFloat(document.getElementById('kisiSayisi').value) || 0;
 
-            // Bilet fiyatı (tek yön) x 2 (git-gel) x kişi sayısı
+            // Bilet fiyatı x 2 x kişi sayısı
             const ucakGenelToplam = biletFiyati * 2 * kisiSayisi;
 
             // --- EKRANA YAZDIRMA ---
