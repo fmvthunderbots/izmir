@@ -12,7 +12,7 @@
 </head>
 <body class="bg-slate-100 min-h-screen flex items-center justify-center p-4">
 
-    <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full p-6 sm:p-8">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-5xl w-full p-6 sm:p-8">
         <h1 class="text-3xl font-bold text-slate-800 mb-8 text-center">İzmir Git-Gel Seyahat Kıyaslayıcı</h1>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -60,16 +60,22 @@
                         </div>
                     </div>
 
-                    <div class="bg-blue-100/60 p-3 rounded-lg border border-blue-200">
-                        <span class="block text-xs font-semibold text-slate-600 mb-1 uppercase">Hesaplanan Git-Gel Yolculuk</span>
-                        <div class="flex items-center gap-2">
-                            <span id="toplamMesafeGosterge" class="text-2xl font-black text-blue-900">0 km</span>
+                    <div class="bg-blue-100/60 p-4 rounded-lg border border-blue-200">
+                        <span class="block text-xs font-bold text-blue-900 mb-2 uppercase tracking-wide">🗺️ Seçilen Rotalar (Google Maps)</span>
+                        <div class="flex flex-col gap-2">
+                            <a id="linkGidis" href="#" target="_blank" class="text-sm font-medium text-blue-700 hover:text-blue-900 hover:underline flex items-center gap-2 bg-white/50 px-3 py-2 rounded-md transition-colors">
+                                <span>📍 Gidiş Rotasını Aç (Hesaplanan: <span id="gidisKm"></span> km)</span>
+                            </a>
+                            <a id="linkDonus" href="#" target="_blank" class="text-sm font-medium text-blue-700 hover:text-blue-900 hover:underline flex items-center gap-2 bg-white/50 px-3 py-2 rounded-md transition-colors">
+                                <span>📍 Dönüş Rotasını Aç (Hesaplanan: <span id="donusKm"></span> km)</span>
+                            </a>
                         </div>
+                        <p class="text-[10px] text-slate-500 mt-2 leading-tight">* Linkler işaretlediğiniz köprü/otoyol tercihlerine göre özel olarak oluşturulur.</p>
                     </div>
 
                     <div class="pt-3 border-t border-blue-200 space-y-2">
                         <div class="flex justify-between items-center text-sm bg-white/50 p-2 rounded-lg border border-blue-100">
-                            <span class="font-semibold text-slate-600 uppercase text-xs">🚗 Toplam Yakıt:</span>
+                            <span class="font-semibold text-slate-600 uppercase text-xs">🚗 Toplam Yakıt (<span id="toplamMesafeGosterge"></span>):</span>
                             <span id="toplamYakitGosterge" class="font-bold text-slate-800">0 ₺</span>
                         </div>
                         
@@ -105,15 +111,18 @@
 
                     <div>
                         <label class="block text-xs font-semibold text-slate-600 mb-1 uppercase">Kişi Sayısı</label>
-                        <input type="number" id="kisiSayisi" value="1" min="1" class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 outline-none font-medium" oninput="hesapla()">
+                        <div class="w-full bg-slate-200 border border-slate-300 rounded-lg px-3 py-2 font-bold text-slate-600 flex justify-between items-center cursor-not-allowed">
+                            <span>2</span>
+                            <span class="text-xs font-medium text-orange-600 bg-orange-100 px-2 py-0.5 rounded-full">Sabit</span>
+                        </div>
                     </div>
 
-                    <p class="text-xs text-slate-500 mt-2 italic">* Sistem girdiğin fiyatı gidiş-dönüş (x2) ve kişi sayısına göre otomatik hesaplar.</p>
+                    <p class="text-xs text-slate-500 mt-2 italic">* Sistem girdiğin bilet fiyatını otomatik olarak <span class="font-semibold">gidiş-dönüş (x2) ve 2 kişi</span> olacak şekilde hesaplar.</p>
                 </div>
 
                 <div class="mt-auto pt-6">
                     <div class="bg-orange-200/50 p-4 rounded-xl text-right border border-orange-200 shadow-sm">
-                        <span class="text-sm font-semibold text-orange-800 block mb-1">Uçak Toplamı (Git-Gel):</span>
+                        <span class="text-sm font-semibold text-orange-800 block mb-1">Uçak Toplamı (Git-Gel 2 Kişi):</span>
                         <span id="ucakToplamTutar" class="text-3xl font-black text-orange-900 tracking-tight">0 ₺</span>
                     </div>
                 </div>
@@ -130,11 +139,27 @@
     </div>
 
     <script>
-        // Virgüllü girişleri noktaya çeviren yardımcı fonksiyon
         function formatNumberInput(value) {
             if (!value) return 0;
             let cleanValue = value.replace(/,/g, '.');
             return parseFloat(cleanValue) || 0;
+        }
+
+        // Google Maps Link Üretici Fonksiyon
+        function generateMapsLink(origin, destination, isOsmangazi, isOtoyol) {
+            if (isOsmangazi && isOtoyol) {
+                // En hızlı, tam paralı yol
+                return `https://www.google.com/maps/dir/${origin}/${destination}/`;
+            } else if (!isOsmangazi && !isOtoyol) {
+                // Tamamen ücretsiz (Körfezi dolaşır, eski yolu kullanır)
+                return `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}&avoid=tolls`;
+            } else if (isOsmangazi && !isOtoyol) {
+                // Sadece Osmangazi'yi kullan, otoyolu kullanma (Ara durak Susurluk atarak devlet yoluna zorlar)
+                return `https://www.google.com/maps/dir/${origin}/Osmangazi+K%C3%B6pr%C3%BCs%C3%BC/Susurluk/${destination}/`;
+            } else {
+                // Sadece İzmir Otoyolunu kullan, köprüyü kullanma (Körfezi dolaşıp Yalova/Gölcük üzerinden otoyola girer)
+                return `https://www.google.com/maps/dir/${origin}/G%C3%B6lc%C3%BCk/${destination}/`;
+            }
         }
 
         function hesapla() {
@@ -142,14 +167,11 @@
             const tuketim = formatNumberInput(document.getElementById('tuketim').value);
             const fiyat = formatNumberInput(document.getElementById('fiyat').value);
             
-            // Sabit Otel Ücreti
             const otel = 4310; 
             
-            // Gidiş Tercihleri
             const osmangaziGidis = document.getElementById('osmangazi_gidis').checked;
             const otoyolGidis = document.getElementById('otoyol_gidis').checked;
             
-            // Dönüş Tercihleri
             const osmangaziDonus = document.getElementById('osmangazi_donus').checked;
             const otoyolDonus = document.getElementById('otoyol_donus').checked;
 
@@ -166,7 +188,18 @@
             if (otoyolDonus) donusMesafe -= 50;
 
             const toplamMesafe = gidisMesafe + donusMesafe;
+            
+            // Arayüzdeki km güncellemeleri
             document.getElementById('toplamMesafeGosterge').innerText = toplamMesafe + ' km';
+            document.getElementById('gidisKm').innerText = gidisMesafe;
+            document.getElementById('donusKm').innerText = donusMesafe;
+
+            // DİNAMİK LİNKLERİ OLUŞTUR VE GÜNCELLE
+            const gidisLinki = generateMapsLink("Istanbul", "Izmir", osmangaziGidis, otoyolGidis);
+            const donusLinki = generateMapsLink("Izmir", "Istanbul", osmangaziDonus, otoyolDonus);
+            
+            document.getElementById('linkGidis').href = gidisLinki;
+            document.getElementById('linkDonus').href = donusLinki;
 
             // Yakıt Masrafı
             const yakitMasrafi = (toplamMesafe / 100) * tuketim * fiyat;
@@ -186,11 +219,11 @@
             document.getElementById('toplamGiseGosterge').innerText = giseMasrafi.toLocaleString('tr-TR', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) + ' ₺';
             document.getElementById('arabaToplamTutar').innerText = arabaGenelToplam.toLocaleString('tr-TR', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) + ' ₺';
 
-            // --- UÇAK HESAPLAMALARI ---
+            // --- UÇAK HESAPLAMALARI (Sabit 2 kişi) ---
             const biletFiyati = formatNumberInput(document.getElementById('biletFiyati').value);
-            const kisiSayisi = parseFloat(document.getElementById('kisiSayisi').value) || 0;
+            const kisiSayisi = 2; // Artık kod üzerinden sabit
 
-            const ucakGenelToplam = biletFiyati * 2 * kisiSayisi;
+            const ucakGenelToplam = biletFiyati * 2 * kisiSayisi; // Bilet x Git-Gel(2) x Kişi(2)
             document.getElementById('ucakToplamTutar').innerText = ucakGenelToplam.toLocaleString('tr-TR', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) + ' ₺';
 
             // --- KIYASLAMA MANTIĞI ---
