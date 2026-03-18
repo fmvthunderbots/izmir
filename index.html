@@ -235,44 +235,44 @@
             const bilgiMetni = document.getElementById('biletBilgiMetni');
             
             try {
-                bilgiMetni.innerHTML = "🌍 Yeni API üzerinden fiyat çekiliyor...";
+                bilgiMetni.innerHTML = "🌍 Sky Scrapper API'den fiyat çekiliyor...";
                 bilgiMetni.className = "text-[10px] text-blue-600 mt-1 italic font-medium animate-pulse";
                 biletInput.classList.add('opacity-50');
 
-                // Görseldeki yeni RapidAPI endpoint'i ve arama parametreleri
-                const url = 'https://flights-sky.p.rapidapi.com/web/flights/details?fromEntityId=IST&toEntityId=ADB&departDate=2026-06-07&currency=TRY';
+                // En stabil çalışan Sky Scrapper (Skyscanner) API'si
+                const url = 'https://sky-scrapper.p.rapidapi.com/api/v1/flights/searchFlights?originSkyId=IST&destinationSkyId=ADB&date=2026-06-07&currency=TRY&cabinClass=economy&adults=1';
                 
                 const options = {
                     method: 'GET',
                     headers: {
                         'x-rapidapi-key': 'e102edf9bdmshb98c3424a904419p1caf2ajsn7d02484d9fcc',
-                        'x-rapidapi-host': 'flights-sky.p.rapidapi.com',
-                        'Content-Type': 'application/json'
+                        'x-rapidapi-host': 'sky-scrapper.p.rapidapi.com'
                     }
                 };
 
                 const response = await fetch(url, options);
 
-                if (!response.ok) throw new Error("API Limit veya Bağlantı Hatası");
+                // API Hatası (Örn: Abone olunmamışsa veya kota dolmuşsa)
+                if (!response.ok) {
+                    throw new Error(`API Hatası: ${response.status} - Lütfen RapidAPI üzerinden Sky Scrapper'a abone olduğunuzdan emin olun.`);
+                }
                 
                 const result = await response.json();
+                console.log("Sky Scrapper Yanıtı:", result);
                 
-                // Dönen verinin yapısını tarayıcı konsolunda (F12 -> Console) görmek için eklendi:
-                console.log("Yeni API Yanıtı:", result);
-                
-                // Eğer API JSON yapısını değiştirdiyse, aşağıdaki path'i konsol loguna bakarak güncellemeniz gerekebilir.
-                if (result && result.data && result.data.flights && result.data.flights[0]) {
-                    const yeniFiyat = result.data.flights[0].price.raw;
+                // Sky Scrapper'ın standart JSON yoluna göre fiyatı bulma
+                if (result && result.data && result.data.itineraries && result.data.itineraries.length > 0) {
+                    const yeniFiyat = result.data.itineraries[0].price.raw;
                     biletInput.value = Math.round(yeniFiyat);
-                    bilgiMetni.innerHTML = "✅ Flights Sky ile canlı fiyat çekildi!";
+                    bilgiMetni.innerHTML = "✅ Sky Scrapper ile canlı fiyat çekildi!";
                     bilgiMetni.className = "text-[10px] text-green-600 font-medium mt-1";
                 } else {
-                    throw new Error("Uçuş bulunamadı veya JSON veri yapısı uyumsuz.");
+                    throw new Error("Seçilen tarihte uçuş bulunamadı veya JSON yapısı uyumsuz.");
                 }
 
             } catch (error) {
                 console.warn(error);
-                bilgiMetni.innerHTML = "⚠️ API'den fiyat çekilemedi. Sabit değer (3500 ₺) yüklendi.";
+                bilgiMetni.innerHTML = "⚠️ API erişilemedi. Sabit değer (3500 ₺) yüklendi.";
                 bilgiMetni.className = "text-[10px] text-amber-600 mt-1 font-medium";
                 biletInput.value = 3500;
             } finally {
