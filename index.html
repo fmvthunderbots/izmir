@@ -70,7 +70,6 @@
                                 <span>📍 Dönüş Rotasını Aç (Hesaplanan: <span id="donusKm"></span> km)</span>
                             </a>
                         </div>
-                        <p class="text-[10px] text-slate-500 mt-2 leading-tight">* Linkler işaretlediğiniz köprü/otoyol tercihlerine göre özel olarak oluşturulur.</p>
                     </div>
 
                     <div class="pt-3 border-t border-blue-200 space-y-2">
@@ -123,7 +122,7 @@
                         </div>
                     </div>
 
-                    <p class="text-xs text-slate-500 mt-2 italic">* Sistem girdiğin bilet fiyatını otomatik olarak <span class="font-semibold">gidiş-dönüş (x2) ve 2 kişi</span> olacak şekilde hesaplar.</p>
+                    <p class="text-xs text-slate-500 mt-2 italic">* Sistem API üzerinden güncel fiyatı çeker ve <span class="font-semibold">gidiş-dönüş (x2) ve 2 kişi</span> olacak şekilde hesaplar.</p>
                 </div>
 
                 <div class="mt-auto pt-6">
@@ -192,11 +191,8 @@
             document.getElementById('gidisKm').innerText = gidisMesafe;
             document.getElementById('donusKm').innerText = donusMesafe;
 
-            const gidisLinki = generateMapsLink("Istanbul", "Izmir", osmangaziGidis, otoyolGidis);
-            const donusLinki = generateMapsLink("Izmir", "Istanbul", osmangaziDonus, otoyolDonus);
-            
-            document.getElementById('linkGidis').href = gidisLinki;
-            document.getElementById('linkDonus').href = donusLinki;
+            document.getElementById('linkGidis').href = generateMapsLink("Istanbul", "Izmir", osmangaziGidis, otoyolGidis);
+            document.getElementById('linkDonus').href = generateMapsLink("Izmir", "Istanbul", osmangaziDonus, otoyolDonus);
 
             const yakitMasrafi = (toplamMesafe / 100) * tuketim * fiyat;
             
@@ -243,44 +239,62 @@
             }
         }
 
-        // --- API SİMÜLASYONU FONKSİYONU ---
+        // --- GERÇEK API İLE FİYAT ÇEKME SİSTEMİ ---
         async function biletFiyatiniCek() {
             const biletInput = document.getElementById('biletFiyati');
             const bilgiMetni = document.getElementById('biletBilgiMetni');
             
-            // Kullanıcı beklerken arayüz boş durmasın diye ilk hesaplamayı tetikleyelim
             hesapla();
 
             try {
-                bilgiMetni.innerHTML = "⏳ THY'den 7 Haziran 2026 fiyatı sorgulanıyor...";
+                bilgiMetni.innerHTML = "🌍 Canlı uçak biletleri taranıyor...";
                 bilgiMetni.className = "text-[10px] text-orange-600 mt-1 italic font-medium transition-opacity";
                 biletInput.classList.add('opacity-50', 'animate-pulse');
+
+                // Senin kopyaladığın URL genel HTML kazıyıcıydı, onu Sky Scrapper'ın gerçek uçuş arama URL'si ile değiştirdim.
+                const url = 'https://sky-scrapper.p.rapidapi.com/api/v1/flights/getPrice?originId=IST&destinationId=ADB&date=2026-06-07&currency=TRY';
                 
-                // Normalde backend'e atacağın istek: 
-                // const response = await fetch('https://seninsunucun.com/api/thy-fiyat?tarih=2026-06-07');
+                // Senin API Şifren
+                const options = {
+                    method: 'GET',
+                    headers: {
+                        'x-rapidapi-key': 'e102edf9bdmshb98c3424a904419p1caf2ajsn7d02484d9fcc',
+                        'x-rapidapi-host': 'sky-scrapper.p.rapidapi.com'
+                    }
+                };
+
+                const response = await fetch(url, options);
                 
-                // Tarayıcı kısıtlamasından dolayı 1.5 saniyelik bir ağ gecikmesi simüle ediyoruz
-                await new Promise(resolve => setTimeout(resolve, 1500)); 
+                if (!response.ok) {
+                    throw new Error("API Limitine Takıldı veya Yanıt Yok");
+                }
                 
-                // Gerçek dünya verisi: 2026 Tavan fiyat uygulamasında biletler 3710 TL ile 6100 TL arasında değişiyor.
-                // 7 Haziran pazar günü için ortalama bir tutar simülasyonu:
-                const guncelFiyat = 3500; 
+                const result = await response.json();
                 
-                biletInput.value = guncelFiyat;
+                // API'den fiyat başarıyla döndüyse al, dönmediyse (örneğin uçuş bulunamadıysa) hata verdir
+                if(result && result.data && result.data.price) {
+                    biletInput.value = Math.round(result.data.price);
+                    bilgiMetni.innerHTML = "✅ İnternetten güncel API fiyatı çekildi!";
+                    bilgiMetni.className = "text-[10px] text-green-600 font-medium mt-1 transition-opacity";
+                } else {
+                    throw new Error("Fiyat verisi API'de bulunamadı");
+                }
+
                 biletInput.classList.remove('opacity-50', 'animate-pulse');
-                bilgiMetni.innerHTML = "✅ 7 Haz 2026 THY tahmini fiyatı çekildi. (Manuel değiştirebilirsiniz)";
-                bilgiMetni.className = "text-[10px] text-green-600 font-medium mt-1 transition-opacity";
-                
-                // Fiyat değiştiği için sistemi yeniden hesaplatıyoruz
                 hesapla(); 
+
             } catch (error) {
+                console.warn("Gerçek API bağlanamadı, Tavan Fiyat Simülasyonu Devrede: ", error);
+                
+                // API kotan biterse veya site çökerse arayüz boş kalmasın diye fallback (yedek) sistem
+                biletInput.value = 3500;
                 biletInput.classList.remove('opacity-50', 'animate-pulse');
-                bilgiMetni.innerHTML = "❌ Fiyat çekilemedi, lütfen manuel girin.";
-                bilgiMetni.className = "text-[10px] text-red-500 mt-1 font-medium";
+                bilgiMetni.innerHTML = "⚠️ Canlı bağlantı kurulamadı. Ortalama tavan fiyat eklendi.";
+                bilgiMetni.className = "text-[10px] text-amber-600 mt-1 font-medium";
+                hesapla();
             }
         }
 
-        // Sayfa yüklendiğinde simüle edilmiş veri çekme işlemini başlat
         window.onload = biletFiyatiniCek;
     </script>
 </body>
