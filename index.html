@@ -153,7 +153,6 @@
         }
 
         function generateMapsLink(origin, destination, isOtoyol) {
-            // Osmangazi Köprüsü artık her zaman true kabul ediliyor
             if (isOtoyol) {
                 return `https://www.google.com/maps/dir/${origin}/${destination}/`;
             } else {
@@ -167,25 +166,20 @@
             const fiyat = formatNumberInput(document.getElementById('fiyat').value);
             const otel = 4310; 
             
-            // Osmangazi Köprüsü artık zorunlu olduğu için değişkenleri doğrudan "true" olarak ayarladık
-            const oGidis = true; 
-            const oDonus = true; 
-            
             const otoyolGidis = document.getElementById('otoyol_gidis').checked;
             const otoyolDonus = document.getElementById('otoyol_donus').checked;
 
             let gidisMesafe = 530;
-            gidisMesafe -= 80; // Osmangazi her zaman kullanıldığı için mesafe kısalır
+            gidisMesafe -= 80; 
             if (otoyolGidis) gidisMesafe -= 50;
 
             let donusMesafe = 530;
-            donusMesafe -= 80; // Osmangazi her zaman kullanıldığı için mesafe kısalır
+            donusMesafe -= 80; 
             if (otoyolDonus) donusMesafe -= 50;
 
             const toplamMesafe = gidisMesafe + donusMesafe;
             const yakitMasrafi = (toplamMesafe / 100) * tuketim * fiyat;
             
-            // Osmangazi köprü masrafı (995 + 995 = 1990) varsayılan olarak gişeye ekleniyor
             let giseMasrafi = 1990; 
             if (otoyolGidis) giseMasrafi += 1470;
             if (otoyolDonus) giseMasrafi += 1470;
@@ -205,7 +199,7 @@
 
             // UÇAK HESABI
             const biletFiyati = formatNumberInput(document.getElementById('biletFiyati').value);
-            const ucakBiletToplam = biletFiyati * 2 * 2; // Bilet x 2 yön x 2 kişi
+            const ucakBiletToplam = biletFiyati * 2 * 2; 
             const ucakGenelToplam = ucakBiletToplam + otel; 
             
             document.getElementById('ucakToplamTutar').innerText = Math.round(ucakGenelToplam).toLocaleString('tr-TR') + ' ₺';
@@ -241,31 +235,39 @@
             const bilgiMetni = document.getElementById('biletBilgiMetni');
             
             try {
-                bilgiMetni.innerHTML = "🌍 Flights Scraper Sky üzerinden fiyat çekiliyor...";
+                bilgiMetni.innerHTML = "🌍 Yeni API üzerinden fiyat çekiliyor...";
                 bilgiMetni.className = "text-[10px] text-blue-600 mt-1 italic font-medium animate-pulse";
                 biletInput.classList.add('opacity-50');
 
-                const url = 'https://flights-scraper-sky.p.rapidapi.com/web/flights/search-one-way?fromEntityId=IST&toEntityId=ADB&departDate=2026-06-07&currency=TRY';
+                // Görseldeki yeni RapidAPI endpoint'i ve arama parametreleri
+                const url = 'https://flights-sky.p.rapidapi.com/web/flights/details?fromEntityId=IST&toEntityId=ADB&departDate=2026-06-07&currency=TRY';
                 
-                const response = await fetch(url, {
+                const options = {
                     method: 'GET',
                     headers: {
                         'x-rapidapi-key': 'e102edf9bdmshb98c3424a904419p1caf2ajsn7d02484d9fcc',
-                        'x-rapidapi-host': 'flights-scraper-sky.p.rapidapi.com'
+                        'x-rapidapi-host': 'flights-sky.p.rapidapi.com',
+                        'Content-Type': 'application/json'
                     }
-                });
+                };
+
+                const response = await fetch(url, options);
 
                 if (!response.ok) throw new Error("API Limit veya Bağlantı Hatası");
                 
                 const result = await response.json();
                 
+                // Dönen verinin yapısını tarayıcı konsolunda (F12 -> Console) görmek için eklendi:
+                console.log("Yeni API Yanıtı:", result);
+                
+                // Eğer API JSON yapısını değiştirdiyse, aşağıdaki path'i konsol loguna bakarak güncellemeniz gerekebilir.
                 if (result && result.data && result.data.flights && result.data.flights[0]) {
                     const yeniFiyat = result.data.flights[0].price.raw;
                     biletInput.value = Math.round(yeniFiyat);
-                    bilgiMetni.innerHTML = "✅ Flights Scraper Sky ile canlı fiyat çekildi!";
+                    bilgiMetni.innerHTML = "✅ Flights Sky ile canlı fiyat çekildi!";
                     bilgiMetni.className = "text-[10px] text-green-600 font-medium mt-1";
                 } else {
-                    throw new Error("Uçuş bulunamadı");
+                    throw new Error("Uçuş bulunamadı veya JSON veri yapısı uyumsuz.");
                 }
 
             } catch (error) {
