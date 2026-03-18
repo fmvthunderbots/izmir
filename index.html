@@ -38,24 +38,24 @@
                     <div class="grid grid-cols-2 gap-4 pt-2 border-t border-blue-100">
                         <div>
                             <h3 class="text-[10px] font-bold text-slate-700 mb-2 uppercase">Gidiş Tercihi</h3>
-                            <label class="flex items-center cursor-pointer mb-2">
-                                <input type="checkbox" id="otoyol_gidis" class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500" onchange="hesapla()">
-                                <span class="ml-2 text-[11px] text-slate-700 font-medium">İzmir Otoyolu (1.470 ₺)</span>
+                            <label class="flex items-center mb-2 cursor-not-allowed opacity-80">
+                                <input type="checkbox" checked disabled class="w-4 h-4 text-blue-600 rounded bg-gray-200 border-gray-300">
+                                <span class="ml-2 text-[11px] text-slate-700 font-bold">Osmangazi (995 ₺) <span class="text-orange-600 ml-1 text-[10px] uppercase">Sabit</span></span>
                             </label>
                             <label class="flex items-center cursor-pointer">
-                                <input type="checkbox" id="osmangazi_gidis" class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500 disabled:opacity-50" onchange="hesapla()">
-                                <span class="ml-2 text-[11px] text-slate-700 font-medium" id="etiket_osmangazi_gidis">Osmangazi (995 ₺)</span>
+                                <input type="checkbox" id="otoyol_gidis" class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500" onchange="hesapla()">
+                                <span class="ml-2 text-[11px] text-slate-700 font-medium">İzmir Otoyolu (1.470 ₺)</span>
                             </label>
                         </div>
                         <div>
                             <h3 class="text-[10px] font-bold text-slate-700 mb-2 uppercase">Dönüş Tercihi</h3>
-                            <label class="flex items-center cursor-pointer mb-2">
-                                <input type="checkbox" id="otoyol_donus" class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500" onchange="hesapla()">
-                                <span class="ml-2 text-[11px] text-slate-700 font-medium">İzmir Otoyolu (1.470 ₺)</span>
+                            <label class="flex items-center mb-2 cursor-not-allowed opacity-80">
+                                <input type="checkbox" checked disabled class="w-4 h-4 text-blue-600 rounded bg-gray-200 border-gray-300">
+                                <span class="ml-2 text-[11px] text-slate-700 font-bold">Osmangazi (995 ₺) <span class="text-orange-600 ml-1 text-[10px] uppercase">Sabit</span></span>
                             </label>
                             <label class="flex items-center cursor-pointer">
-                                <input type="checkbox" id="osmangazi_donus" class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500 disabled:opacity-50" onchange="hesapla()">
-                                <span class="ml-2 text-[11px] text-slate-700 font-medium" id="etiket_osmangazi_donus">Osmangazi (995 ₺)</span>
+                                <input type="checkbox" id="otoyol_donus" class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500" onchange="hesapla()">
+                                <span class="ml-2 text-[11px] text-slate-700 font-medium">İzmir Otoyolu (1.470 ₺)</span>
                             </label>
                         </div>
                     </div>
@@ -78,7 +78,7 @@
                             <span id="toplamYakitGosterge" class="font-bold text-slate-800 text-sm">0 ₺</span>
                         </div>
                         <div class="flex justify-between items-center text-sm bg-white/50 p-2 rounded-lg border border-blue-100">
-                            <span class="font-semibold text-slate-600 uppercase text-[10px]">🛣️ Toplam Gişe:</span>
+                            <span class="font-semibold text-slate-600 uppercase text-[10px]">🛣️ Toplam Gişe (Köprü Dahil):</span>
                             <span id="toplamGiseGosterge" class="font-bold text-slate-800 text-sm">0 ₺</span>
                         </div>
                         <div class="flex justify-between items-center text-sm bg-white/50 p-2 rounded-lg border border-blue-100">
@@ -100,6 +100,189 @@
                     <h2 class="text-xl font-bold text-orange-900">Uçak + Otel</h2>
                 </div>
 
+                <div class="space-y-4 flex-grow">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1 uppercase text-[10px]">Tek Yön Bilet Fiyatı (1 Kişi - TL)</label>
+                        <div class="relative">
+                            <input type="text" inputmode="decimal" id="biletFiyati" value="3500" class="w-full border border-slate-300 rounded-lg px-3 py-2 pr-10 focus:ring-2 focus:ring-orange-500 outline-none font-medium text-sm transition-all" oninput="hesapla()">
+                            <button onclick="biletFiyatiniCek()" class="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-orange-600 transition-colors" title="Fiyatı Yeniden Sorgula">🔄</button>
+                        </div>
+                        <p id="biletBilgiMetni" class="text-[10px] text-slate-500 mt-1 h-3 leading-tight"></p>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1 uppercase text-[10px]">Kişi Sayısı</label>
+                        <div class="w-full bg-slate-200 border border-slate-300 rounded-lg px-3 py-2 font-bold text-slate-600 flex justify-between items-center cursor-not-allowed text-sm">
+                            <span>2</span>
+                            <span class="text-[10px] font-medium text-orange-600 bg-orange-100 px-2 py-0.5 rounded-full uppercase">Sabit</span>
+                        </div>
+                    </div>
+
+                    <p class="text-[11px] text-slate-500 mt-2 italic">* Sistem <span class="font-semibold">gidiş-dönüş (x2) ve 2 kişi</span> üzerinden bilet fiyatını hesaplar.</p>
+
+                    <div class="pt-3 border-t border-orange-200 space-y-2 mt-4">
+                        <div class="flex justify-between items-center text-sm bg-white/50 p-2 rounded-lg border border-orange-100">
+                            <span class="font-semibold text-slate-600 uppercase text-[10px]">🏨 Otel Ücreti:</span>
+                            <span class="font-bold text-slate-800 text-sm">4.310 ₺ <span class="text-[10px] font-medium text-green-600 ml-1">(Ödendi)</span></span>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="mt-auto pt-6">
+                    <div class="bg-orange-200/50 p-4 rounded-xl text-right border border-orange-200 shadow-sm">
+                        <span class="text-xs font-semibold text-orange-800 block mb-1 uppercase">Uçak + Otel Toplamı:</span>
+                        <span id="ucakToplamTutar" class="text-3xl font-black text-orange-900 tracking-tight">0 ₺</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="sonucKutusu" class="mt-8 p-6 rounded-xl text-center border-2 transition-all duration-300 shadow-sm">
+            <h3 class="text-xs font-bold text-slate-500 mb-3 uppercase tracking-wider">Sonuç ve Kıyaslama</h3>
+            <div id="sonucMetni" class="text-2xl sm:text-3xl font-black">Değerleri girin...</div>
+            <div id="farkMetni" class="text-base sm:text-lg font-medium mt-2 text-slate-700"></div>
+        </div>
+    </div>
+
+    <script>
+        function formatNumberInput(value) {
+            if (!value) return 0;
+            let cleanValue = String(value).replace(/,/g, '.');
+            return parseFloat(cleanValue) || 0;
+        }
+
+        function generateMapsLink(origin, destination, isOtoyol) {
+            // Osmangazi Köprüsü artık her zaman true kabul ediliyor
+            if (isOtoyol) {
+                return `https://www.google.com/maps/dir/${origin}/${destination}/`;
+            } else {
+                return `https://www.google.com/maps/dir/${origin}/Osmangazi+K%C3%B6pr%C3%BCs%C3%BC/Susurluk/${destination}/`;
+            }
+        }
+
+        function hesapla() {
+            // ARABA HESABI
+            const tuketim = formatNumberInput(document.getElementById('tuketim').value);
+            const fiyat = formatNumberInput(document.getElementById('fiyat').value);
+            const otel = 4310; 
+            
+            // Osmangazi Köprüsü artık zorunlu olduğu için değişkenleri doğrudan "true" olarak ayarladık
+            const oGidis = true; 
+            const oDonus = true; 
+            
+            const otoyolGidis = document.getElementById('otoyol_gidis').checked;
+            const otoyolDonus = document.getElementById('otoyol_donus').checked;
+
+            let gidisMesafe = 530;
+            gidisMesafe -= 80; // Osmangazi her zaman kullanıldığı için mesafe kısalır
+            if (otoyolGidis) gidisMesafe -= 50;
+
+            let donusMesafe = 530;
+            donusMesafe -= 80; // Osmangazi her zaman kullanıldığı için mesafe kısalır
+            if (otoyolDonus) donusMesafe -= 50;
+
+            const toplamMesafe = gidisMesafe + donusMesafe;
+            const yakitMasrafi = (toplamMesafe / 100) * tuketim * fiyat;
+            
+            // Osmangazi köprü masrafı (995 + 995 = 1990) varsayılan olarak gişeye ekleniyor
+            let giseMasrafi = 1990; 
+            if (otoyolGidis) giseMasrafi += 1470;
+            if (otoyolDonus) giseMasrafi += 1470;
+
+            const arabaGenelToplam = yakitMasrafi + giseMasrafi + otel;
+
+            // Rota Linklerini Güncelle
+            document.getElementById('linkGidis').href = generateMapsLink("Istanbul", "Izmir", otoyolGidis);
+            document.getElementById('linkDonus').href = generateMapsLink("Izmir", "Istanbul", otoyolDonus);
+
+            document.getElementById('gidisKm').innerText = gidisMesafe;
+            document.getElementById('donusKm').innerText = donusMesafe;
+            document.getElementById('toplamMesafeGosterge').innerText = toplamMesafe + ' km';
+            document.getElementById('toplamYakitGosterge').innerText = Math.round(yakitMasrafi).toLocaleString('tr-TR') + ' ₺';
+            document.getElementById('toplamGiseGosterge').innerText = giseMasrafi.toLocaleString('tr-TR') + ' ₺';
+            document.getElementById('arabaToplamTutar').innerText = Math.round(arabaGenelToplam).toLocaleString('tr-TR') + ' ₺';
+
+            // UÇAK HESABI
+            const biletFiyati = formatNumberInput(document.getElementById('biletFiyati').value);
+            const ucakBiletToplam = biletFiyati * 2 * 2; // Bilet x 2 yön x 2 kişi
+            const ucakGenelToplam = ucakBiletToplam + otel; 
+            
+            document.getElementById('ucakToplamTutar').innerText = Math.round(ucakGenelToplam).toLocaleString('tr-TR') + ' ₺';
+
+            // KIYASLAMA
+            const sonucKutusu = document.getElementById('sonucKutusu');
+            const sonucMetni = document.getElementById('sonucMetni');
+            const farkMetni = document.getElementById('farkMetni');
+            
+            const fark = Math.abs(arabaGenelToplam - ucakGenelToplam);
+            const formatliFark = Math.round(fark).toLocaleString('tr-TR') + ' ₺';
+
+            if (arabaGenelToplam < ucakGenelToplam) {
+                sonucKutusu.className = "mt-8 p-6 rounded-xl text-center border-2 border-blue-400 bg-blue-50 shadow-sm";
+                sonucMetni.className = "text-2xl sm:text-3xl font-black text-blue-700";
+                sonucMetni.innerText = "🚗 Araba ile gitmek daha kârlı!";
+                farkMetni.innerText = `Uçağa kıyasla cebinizde ${formatliFark} kalır.`;
+            } else if (ucakGenelToplam < arabaGenelToplam) {
+                sonucKutusu.className = "mt-8 p-6 rounded-xl text-center border-2 border-orange-400 bg-orange-50 shadow-sm";
+                sonucMetni.className = "text-2xl sm:text-3xl font-black text-orange-700";
+                sonucMetni.innerText = "✈️ Uçakla gitmek daha kârlı!";
+                farkMetni.innerText = `Arabaya kıyasla cebinizde ${formatliFark} kalır.`;
+            } else {
+                sonucKutusu.className = "mt-8 p-6 rounded-xl text-center border-2 border-slate-300 bg-slate-100 shadow-sm";
+                sonucMetni.className = "text-2xl sm:text-3xl font-black text-slate-700";
+                sonucMetni.innerText = "⚖️ İki seçenek de aynı fiyata geliyor!";
+                farkMetni.innerText = "Karar tamamen konfor tercihinize kalmış.";
+            }
+        }
+
+        async function biletFiyatiniCek() {
+            const biletInput = document.getElementById('biletFiyati');
+            const bilgiMetni = document.getElementById('biletBilgiMetni');
+            
+            try {
+                bilgiMetni.innerHTML = "🌍 Flights Scraper Sky üzerinden fiyat çekiliyor...";
+                bilgiMetni.className = "text-[10px] text-blue-600 mt-1 italic font-medium animate-pulse";
+                biletInput.classList.add('opacity-50');
+
+                const url = 'https://flights-scraper-sky.p.rapidapi.com/web/flights/search-one-way?fromEntityId=IST&toEntityId=ADB&departDate=2026-06-07&currency=TRY';
+                
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'x-rapidapi-key': 'e102edf9bdmshb98c3424a904419p1caf2ajsn7d02484d9fcc',
+                        'x-rapidapi-host': 'flights-scraper-sky.p.rapidapi.com'
+                    }
+                });
+
+                if (!response.ok) throw new Error("API Limit veya Bağlantı Hatası");
+                
+                const result = await response.json();
+                
+                if (result && result.data && result.data.flights && result.data.flights[0]) {
+                    const yeniFiyat = result.data.flights[0].price.raw;
+                    biletInput.value = Math.round(yeniFiyat);
+                    bilgiMetni.innerHTML = "✅ Flights Scraper Sky ile canlı fiyat çekildi!";
+                    bilgiMetni.className = "text-[10px] text-green-600 font-medium mt-1";
+                } else {
+                    throw new Error("Uçuş bulunamadı");
+                }
+
+            } catch (error) {
+                console.warn(error);
+                bilgiMetni.innerHTML = "⚠️ API'den fiyat çekilemedi. Sabit değer (3500 ₺) yüklendi.";
+                bilgiMetni.className = "text-[10px] text-amber-600 mt-1 font-medium";
+                biletInput.value = 3500;
+            } finally {
+                biletInput.classList.remove('opacity-50');
+                hesapla();
+            }
+        }
+
+        window.onload = biletFiyatiniCek;
+    </script>
+</body>
+</html>
                 <div class="space-y-4 flex-grow">
                     <div>
                         <label class="block text-xs font-semibold text-slate-600 mb-1 uppercase text-[10px]">Tek Yön Bilet Fiyatı (1 Kişi - TL)</label>
