@@ -139,4 +139,97 @@
         <div id="sonucKutusu" class="mt-8 p-6 rounded-xl text-center border-2 transition-all duration-300 shadow-sm">
             <h3 class="text-xs font-bold text-slate-500 mb-3 uppercase tracking-wider">Sonuç ve Kıyaslama</h3>
             <div id="sonucMetni" class="text-2xl sm:text-3xl font-black">Değerleri girin...</div>
-            <div id="farkMet
+            <div id="farkMetni" class="text-base sm:text-lg font-medium mt-2 text-slate-700"></div>
+        </div>
+    </div>
+
+    <script>
+        function formatNumberInput(value) {
+            if (!value) return 0;
+            let cleanValue = String(value).replace(/,/g, '.');
+            return parseFloat(cleanValue) || 0;
+        }
+
+        function generateMapsLink(origin, destination, isOtoyol) {
+            if (isOtoyol) {
+                return `https://www.google.com/maps/dir/$${origin}/${destination}/`;
+            } else {
+                return `https://www.google.com/maps/dir/$${origin}/Osmangazi+K%C3%B6pr%C3%BCs%C3%BC/Susurluk/${destination}/`;
+            }
+        }
+
+        function hesapla() {
+            // ARABA HESABI
+            const tuketim = formatNumberInput(document.getElementById('tuketim').value);
+            const fiyat = formatNumberInput(document.getElementById('fiyat').value);
+            const otel = 4310; 
+            
+            const otoyolGidis = document.getElementById('otoyol_gidis').checked;
+            const otoyolDonus = document.getElementById('otoyol_donus').checked;
+
+            let gidisMesafe = 530;
+            gidisMesafe -= 80; 
+            if (otoyolGidis) gidisMesafe -= 50;
+
+            let donusMesafe = 530;
+            donusMesafe -= 80; 
+            if (otoyolDonus) donusMesafe -= 50;
+
+            const toplamMesafe = gidisMesafe + donusMesafe;
+            const yakitMasrafi = (toplamMesafe / 100) * tuketim * fiyat;
+            
+            let giseMasrafi = 1990; 
+            if (otoyolGidis) giseMasrafi += 1470;
+            if (otoyolDonus) giseMasrafi += 1470;
+
+            const arabaGenelToplam = yakitMasrafi + giseMasrafi + otel;
+
+            // Rota Linklerini Güncelle
+            document.getElementById('linkGidis').href = generateMapsLink("Istanbul", "Izmir", otoyolGidis);
+            document.getElementById('linkDonus').href = generateMapsLink("Izmir", "Istanbul", otoyolDonus);
+
+            document.getElementById('gidisKm').innerText = gidisMesafe;
+            document.getElementById('donusKm').innerText = donusMesafe;
+            document.getElementById('toplamMesafeGosterge').innerText = toplamMesafe + ' km';
+            document.getElementById('toplamYakitGosterge').innerText = Math.round(yakitMasrafi).toLocaleString('tr-TR') + ' ₺';
+            document.getElementById('toplamGiseGosterge').innerText = giseMasrafi.toLocaleString('tr-TR') + ' ₺';
+            document.getElementById('arabaToplamTutar').innerText = Math.round(arabaGenelToplam).toLocaleString('tr-TR') + ' ₺';
+
+            // UÇAK HESABI
+            const biletFiyati = formatNumberInput(document.getElementById('biletFiyati').value);
+            const ucakBiletToplam = biletFiyati * 2 * 2; 
+            const ucakGenelToplam = ucakBiletToplam + otel; 
+            
+            document.getElementById('ucakToplamTutar').innerText = Math.round(ucakGenelToplam).toLocaleString('tr-TR') + ' ₺';
+
+            // KIYASLAMA
+            const sonucKutusu = document.getElementById('sonucKutusu');
+            const sonucMetni = document.getElementById('sonucMetni');
+            const farkMetni = document.getElementById('farkMetni');
+            
+            const fark = Math.abs(arabaGenelToplam - ucakGenelToplam);
+            const formatliFark = Math.round(fark).toLocaleString('tr-TR') + ' ₺';
+
+            if (arabaGenelToplam < ucakGenelToplam) {
+                sonucKutusu.className = "mt-8 p-6 rounded-xl text-center border-2 border-blue-400 bg-blue-50 shadow-sm";
+                sonucMetni.className = "text-2xl sm:text-3xl font-black text-blue-700";
+                sonucMetni.innerText = "🚗 Araba ile gitmek daha kârlı!";
+                farkMetni.innerText = `Uçağa kıyasla cebinizde ${formatliFark} kalır.`;
+            } else if (ucakGenelToplam < arabaGenelToplam) {
+                sonucKutusu.className = "mt-8 p-6 rounded-xl text-center border-2 border-orange-400 bg-orange-50 shadow-sm";
+                sonucMetni.className = "text-2xl sm:text-3xl font-black text-orange-700";
+                sonucMetni.innerText = "✈️ Uçakla gitmek daha kârlı!";
+                farkMetni.innerText = `Arabaya kıyasla cebinizde ${formatliFark} kalır.`;
+            } else {
+                sonucKutusu.className = "mt-8 p-6 rounded-xl text-center border-2 border-slate-300 bg-slate-100 shadow-sm";
+                sonucMetni.className = "text-2xl sm:text-3xl font-black text-slate-700";
+                sonucMetni.innerText = "⚖️ İki seçenek de aynı fiyata geliyor!";
+                farkMetni.innerText = "Karar tamamen konfor tercihinize kalmış.";
+            }
+        }
+
+        // Sayfa yüklendiğinde hesaplamayı direkt çalıştır (API beklentisi olmadan)
+        window.onload = hesapla;
+    </script>
+</body>
+</html>
