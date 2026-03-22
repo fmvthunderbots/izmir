@@ -104,7 +104,7 @@
                     <div>
                         <label class="block text-xs font-semibold text-slate-600 mb-1 uppercase text-[10px]">Tek Yön Bilet Fiyatı (1 Kişi - TL)</label>
                         <div>
-                            <input type="text" inputmode="decimal" id="biletFiyati" value="3500" class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 outline-none font-medium text-sm transition-all" oninput="hesapla()">
+                            <input type="text" inputmode="decimal" id="biletFiyati" value="4500" class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 outline-none font-medium text-sm transition-all" oninput="hesapla()">
                         </div>
                     </div>
 
@@ -118,10 +118,10 @@
 
                     <p class="text-[11px] text-slate-500 mt-2 italic">* Sistem <span class="font-semibold">gidiş-dönüş (x2) ve 2 kişi</span> üzerinden bilet fiyatını hesaplar.</p>
 
-                    <div class="pt-3 border-t border-orange-200 space-y-2 mt-4">
-                        <div class="flex justify-between items-center text-sm bg-white/50 p-2 rounded-lg border border-orange-100">
-                            <span class="font-semibold text-slate-600 uppercase text-[10px]">🏨 Otel Ücreti:</span>
-                            <span class="font-bold text-slate-800 text-sm">4.310 ₺ <span class="text-[10px] font-medium text-green-600 ml-1">(Ödendi)</span></span>
+                    <div class="pt-3 border-t border-orange-200 mt-4">
+                        <label class="block text-xs font-semibold text-slate-600 mb-1 uppercase text-[10px]">🏨 Otel Ücreti (TL)</label>
+                        <div>
+                            <input type="text" inputmode="decimal" id="ucakOtelFiyati" value="5110" class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 outline-none font-medium text-sm transition-all" oninput="hesapla()">
                         </div>
                     </div>
 
@@ -162,7 +162,7 @@
             // ARABA HESABI
             const tuketim = formatNumberInput(document.getElementById('tuketim').value);
             const fiyat = formatNumberInput(document.getElementById('fiyat').value);
-            const otel = 4310; 
+            const arabaOtel = 4310; // Araba için sabit otel fiyatı
             
             const otoyolGidis = document.getElementById('otoyol_gidis').checked;
             const otoyolDonus = document.getElementById('otoyol_donus').checked;
@@ -182,7 +182,7 @@
             if (otoyolGidis) giseMasrafi += 1470;
             if (otoyolDonus) giseMasrafi += 1470;
 
-            const arabaGenelToplam = yakitMasrafi + giseMasrafi + otel;
+            const arabaGenelToplam = yakitMasrafi + giseMasrafi + arabaOtel;
 
             // Rota Linklerini Güncelle
             document.getElementById('linkGidis').href = generateMapsLink("Istanbul", "Izmir", otoyolGidis);
@@ -197,8 +197,10 @@
 
             // UÇAK HESABI
             const biletFiyati = formatNumberInput(document.getElementById('biletFiyati').value);
+            const ucakOtelFiyati = formatNumberInput(document.getElementById('ucakOtelFiyati').value); // Kullanıcının girdiği otel fiyatı
+            
             const ucakBiletToplam = biletFiyati * 2 * 2; 
-            const ucakGenelToplam = ucakBiletToplam + otel; 
+            const ucakGenelToplam = ucakBiletToplam + ucakOtelFiyati; 
             
             document.getElementById('ucakToplamTutar').innerText = Math.round(ucakGenelToplam).toLocaleString('tr-TR') + ' ₺';
 
